@@ -1,5 +1,7 @@
-from src.extraer import extraerData
+from src.etl import extraerData, limpiarData
 
 data=extraerData()
 
-print(data)
+data_limpia=limpiarData(data)
+
+print(data_limpia)

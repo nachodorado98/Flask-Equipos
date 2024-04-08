@@ -3,3 +3,6 @@ class PaginaError(Exception):
 
 class LigasError(Exception):
     pass
+
+class LigasExistentesError(Exception):
+    pass
