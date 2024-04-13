@@ -6,3 +6,6 @@ class LigasError(Exception):
 
 class LigasExistentesError(Exception):
     pass
+
+class LigaCargadaError(Exception):
+    pass

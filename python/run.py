@@ -1,7 +1,27 @@
-from src.etl import extraerData, limpiarData
+import time
 
-data=extraerData()
+from src.etl import extraerData, limpiarData, cargarData
 
-data_limpia=limpiarData(data)
+def pipeline()->None:
 
-print(data_limpia)
+	try:
+
+		data=extraerData()
+
+		data_limpia=limpiarData(data)
+
+		print(data_limpia)
+
+		cargarData(data_limpia)
+
+		print("Pipeline finalizado")
+
+	except AttributeError as e:
+
+		print("Reconectando en 5 segundos...")
+
+		time.sleep(5)
+
+		pipeline()
+
+pipeline()

@@ -7,6 +7,7 @@ import pytest
 from src.scraper import Scraper
 from src.scraper_ligas import ScraperLigas
 from src.config import ENDPOINT_LIGAS
+from src.database.conexion import Conexion
 
 @pytest.fixture
 def scraper():
@@ -17,3 +18,14 @@ def scraper():
 def scraper_ligas():
 
 	return ScraperLigas(ENDPOINT_LIGAS)
+
+@pytest.fixture(scope="function")
+def conexion():
+
+    con=Conexion()
+
+    con.c.execute("TRUNCATE TABLE ligas")
+
+    con.confirmar()
+
+    return con

@@ -39,7 +39,7 @@ class ScraperLigas(Scraper):
 
         contenido_filas=self.__obtenerContenidoFilas(filas)
 
-        return pd.DataFrame(contenido_filas, columns=["Pais", "Endpoint"])
+        return pd.DataFrame(contenido_filas, columns=["Liga", "Endpoint"])
 
     def obtenerLigas(self)->pd.DataFrame:
 
