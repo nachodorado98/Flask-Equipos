@@ -12,3 +12,6 @@ class LigaCargadaError(Exception):
 
 class EquiposError(Exception):
     pass
+
+class EquiposExistentesError(Exception):
+    pass

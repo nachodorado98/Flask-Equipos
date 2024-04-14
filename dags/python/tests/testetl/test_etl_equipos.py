@@ -1,8 +1,8 @@
 import pytest
 import pandas as pd
 
-from src.etl_equipos import extraerDataEquipos
-from src.excepciones import EquiposError
+from src.etl_equipos import extraerDataEquipos, limpiarDataEquipos
+from src.excepciones import EquiposError, EquiposExistentesError
 
 def test_extraer_data_equipos_error_endpoint():
 
@@ -17,4 +17,20 @@ def test_extraer_data_equipos():
 	assert isinstance(data, pd.DataFrame)
 	assert not data.empty
 
-	print(data)
+def test_limpiar_data_equipos_error():
+
+	data=extraerDataEquipos("/en/country/clubs/GUF/French-Guiana-Football-Clubs")
+
+	with pytest.raises(EquiposExistentesError):
+
+		limpiarDataEquipos(data)
+
+def test_limpiar_data_equipos():
+
+	data=extraerDataEquipos("/en/country/clubs/ESP/Spain-Football-Clubs")
+
+	data_limpia=limpiarDataEquipos(data)
+
+	assert isinstance(data_limpia, pd.DataFrame)
+	assert not data_limpia.empty
+	assert len(data_limpia.columns)==3

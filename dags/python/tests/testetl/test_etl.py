@@ -36,7 +36,7 @@ def test_limpiar_data(ligas):
 	data_limpia=limpiarData(data, ligas)
 
 	assert isinstance(data_limpia, pd.DataFrame)
-	assert not data.empty
+	assert not data_limpia.empty
 	assert len(data_limpia)==len(ligas)
 
 @pytest.mark.parametrize(["ligas"],
