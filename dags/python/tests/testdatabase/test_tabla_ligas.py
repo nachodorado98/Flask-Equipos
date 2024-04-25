@@ -25,3 +25,17 @@ def test_existe_liga_existe(conexion):
 	conexion.insertarLiga(liga)
 
 	assert conexion.existe_liga("España")
+
+def test_obtener_id_liga_no_existe(conexion):
+
+	assert not conexion.obtenerIdLiga("España")
+
+def test_obtener_id_liga_existe(conexion):
+
+	liga=["España", "url", "ESP"]
+
+	conexion.insertarLiga(liga)
+
+	id_liga=conexion.obtenerIdLiga("España")
+
+	assert isinstance(id_liga, int)

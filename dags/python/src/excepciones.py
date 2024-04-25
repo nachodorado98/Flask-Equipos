@@ -7,9 +7,6 @@ class LigasError(Exception):
 class LigasExistentesError(Exception):
     pass
 
-class LigaCargadaError(Exception):
-    pass
-
 class EquiposError(Exception):
     pass
 

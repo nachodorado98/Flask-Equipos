@@ -25,7 +25,7 @@ def conexion():
 
     con=Conexion()
 
-    con.c.execute("TRUNCATE TABLE ligas")
+    con.c.execute("DELETE FROM ligas")
 
     con.confirmar()
 

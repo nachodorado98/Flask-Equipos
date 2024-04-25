@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from typing import List
+from typing import List, Optional
 
 from .confconexion import *
 
@@ -33,7 +33,7 @@ class Conexion:
 	def insertarLiga(self, liga:List[str])->None:
 
 		self.c.execute("""INSERT INTO ligas (liga, url, siglas)
-							VALUES(%s,%s,%s)""",
+							VALUES(%s, %s, %s)""",
 							tuple(liga))
 
 		self.confirmar()
@@ -47,3 +47,34 @@ class Conexion:
 							(liga,))
 
 		return False if self.c.fetchone() is None else True
+
+	# Metodo para obtener el id liga de una liga
+	def obtenerIdLiga(self, liga:str)->Optional[int]:
+
+		self.c.execute("""SELECT Id
+							FROM ligas
+							WHERE Liga=%s""",
+							(liga,))
+
+		id_liga=self.c.fetchone()
+
+		return None if id_liga is None else id_liga["id"]
+
+	# Metodo para saber si existe el equipo
+	def existe_equipo(self, equipo:str)->bool:
+
+		self.c.execute("""SELECT *
+							FROM equipos
+							WHERE Equipo=%s""",
+							(equipo,))
+
+		return False if self.c.fetchone() is None else True
+
+	#Metodo para insertar un equipo
+	def insertarEquipo(self, equipo:List[str])->None:
+
+		self.c.execute("""INSERT INTO equipos (equipo, url, equipo_url, id_liga)
+							VALUES(%s, %s, %s, %s)""",
+							tuple(equipo))
+
+		self.confirmar()

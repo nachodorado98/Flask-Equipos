@@ -3,7 +3,7 @@ from typing import Optional, List
 
 from .scraper_ligas import ScraperLigas
 
-from .excepciones import LigasError, LigasExistentesError, LigaCargadaError
+from .excepciones import LigasError, LigasExistentesError
 
 from .config import ENDPOINT_LIGAS, LIGAS_PAISES
 
@@ -42,9 +42,5 @@ def cargarData(tabla:pd.DataFrame)->None:
 		if not con.existe_liga(liga[0]):
 
 			con.insertarLiga(liga)
-
-		else:
-
-			raise LigaCargadaError(f"Liga {liga[0]} existente")
 
 	con.cerrarConexion()

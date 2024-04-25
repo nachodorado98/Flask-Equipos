@@ -3,7 +3,7 @@ import pandas as pd
 import time
 
 from src.etl import extraerData, limpiarData, cargarData
-from src.excepciones import LigasError, LigasExistentesError, LigaCargadaError
+from src.excepciones import LigasError, LigasExistentesError
 
 def test_extraer_data_error_endpoint():
 
@@ -62,12 +62,48 @@ def test_cargar_data_existe_liga(conexion):
 
 	cargarData(data_limpia)
 
+	conexion.c.execute("SELECT * FROM ligas")
+
+	ligas1=len(conexion.c.fetchall())
+
 	data_2=extraerData()
 
 	data_limpia_2=limpiarData(data_2)
 
-	with pytest.raises(LigaCargadaError):
+	cargarData(data_limpia_2)
 
-		cargarData(data_limpia_2)
+	conexion.c.execute("SELECT * FROM ligas")
+
+	ligas2=len(conexion.c.fetchall())
+
+	assert ligas1==ligas2
+
+def test_cargar_data_nueva_liga(conexion):
+
+	data=extraerData()
+
+	data_limpia=limpiarData(data)
+
+	data_limpia_dropeada=data_limpia.drop(0)
+
+	assert data_limpia.shape[0]>data_limpia_dropeada.shape[0]
+
+	cargarData(data_limpia_dropeada)
+
+	conexion.c.execute("SELECT * FROM ligas")
+
+	ligas1=len(conexion.c.fetchall())
+
+	data_2=extraerData()
+
+	data_limpia_2=limpiarData(data_2)
+
+	cargarData(data_limpia_2)
+
+	conexion.c.execute("SELECT * FROM ligas")
+
+	ligas2=len(conexion.c.fetchall())
+
+	assert ligas2>ligas1
 
 	time.sleep(60)
