@@ -12,3 +12,6 @@ class EquiposError(Exception):
 
 class EquiposExistentesError(Exception):
     pass
+
+class InfoEquipoError(Exception):
+    pass

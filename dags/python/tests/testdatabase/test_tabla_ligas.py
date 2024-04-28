@@ -1,3 +1,5 @@
+import pytest
+
 def test_tabla_ligas_vacia(conexion):
 
 	conexion.c.execute("SELECT * FROM ligas")
@@ -39,3 +41,24 @@ def test_obtener_id_liga_existe(conexion):
 	id_liga=conexion.obtenerIdLiga("España")
 
 	assert isinstance(id_liga, int)
+
+def test_obtener_id_url_ligas_no_existen(conexion):
+
+	assert conexion.obtenerIdUrlLigas() is None
+
+@pytest.mark.parametrize(["ligas", "numero"],
+	[
+		([["España", "url", "ESP"]], 1),
+		([["España", "url", "ESP"],["Francia", "urlf", "F"]], 2),
+		([["España", "url", "ESP"],["Francia", "urlf", "F"], ["Liga", "liga", "l"]], 3),
+	]
+)
+def test_obtener_id_url_ligas_existen(conexion, ligas, numero):
+
+	for liga in ligas:
+
+		conexion.insertarLiga(liga)
+
+	lista_ligas=conexion.obtenerIdUrlLigas()
+
+	assert len(lista_ligas)==numero

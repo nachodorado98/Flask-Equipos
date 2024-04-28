@@ -3,7 +3,7 @@ from typing import Optional, List
 
 from .scraper_ligas import ScraperLigas
 
-from .excepciones import LigasError, LigasExistentesError
+from .excepciones import LigasExistentesError
 
 from .config import ENDPOINT_LIGAS, LIGAS_PAISES
 

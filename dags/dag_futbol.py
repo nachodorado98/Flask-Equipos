@@ -45,27 +45,27 @@ def ETL_Equipos()->str:
 
 	conexion=Conexion()
 
-	try:
+	ligas=conexion.obtenerIdUrlLigas()
 
-		id_liga=conexion.obtenerIdLiga("Spain")
+	for id_liga, url in ligas:
 
-		data=extraerDataEquipos("/en/country/clubs/ESP/Spain-Football-Clubs")
+		try:
 
-		data_limpia=limpiarDataEquipos(data)
+			print(f"ETL Equipos Liga Id {id_liga}")
 
-		cargarDataEquipos(data_limpia, id_liga)
+			data=extraerDataEquipos(url)
 
-		print("ETL Equipos finalizada")
+			data_limpia=limpiarDataEquipos(data)
 
-		conexion.cerrarConexion()
+			cargarDataEquipos(data_limpia, id_liga)
 
-		return "no_hacer_nada"
+		except Exception as e:
 
-	except Exception as e:
+			crearArchivoLog(f"ETL Equipos fallido en la liga {id_liga}")		
 
-		conexion.cerrarConexion()
+	conexion.cerrarConexion()
 
-		return "log_equipos"
+	print("ETL Equipos finalizada")
 
 
 with DAG("dag_futbol",
@@ -86,12 +86,6 @@ with DAG("dag_futbol",
 
 	tarea_etl_equipos=BranchPythonOperator(task_id="etl_equipos", python_callable=ETL_Equipos)
 
-	tarea_log_equipos=PythonOperator(task_id="log_equipos", python_callable=crearArchivoLog, op_kwargs={"motivo": "ETL Equipos fallido"})
-
-	tarea_dummy=DummyOperator(task_id="no_hacer_nada")
-
 tarea_existe_carpeta >> [tarea_carpeta_logs, tarea_etl_ligas]
 
 tarea_carpeta_logs >> tarea_etl_ligas >> [tarea_log_ligas, tarea_etl_equipos]
-
-tarea_etl_equipos >> [tarea_log_equipos, tarea_dummy]

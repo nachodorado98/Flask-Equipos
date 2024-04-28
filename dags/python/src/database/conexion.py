@@ -78,3 +78,13 @@ class Conexion:
 							tuple(equipo))
 
 		self.confirmar()
+
+	# Metodo para obtener la informacion de las ligas
+	def obtenerIdUrlLigas(self)->Optional[List[tuple]]:
+
+		self.c.execute("""SELECT Id, Url
+							FROM ligas""")
+
+		ligas=self.c.fetchall()
+
+		return None if not ligas else list(map(lambda liga: (liga["id"], liga["url"]), ligas))

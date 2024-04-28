@@ -3,7 +3,7 @@ from typing import Optional
 
 from .scraper_equipos import ScraperEquipos
 
-from .excepciones import EquiposError, EquiposExistentesError
+from .excepciones import EquiposExistentesError
 
 from .database.conexion import Conexion
 
@@ -42,8 +42,6 @@ def cargarDataEquipos(tabla:pd.DataFrame, id_liga:int)->None:
 		if not con.existe_equipo(equipo[0]):
 
 			equipo.append(id_liga)
-
-			print(equipo)
 
 			con.insertarEquipo(equipo)
 

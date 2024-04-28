@@ -9,6 +9,7 @@ from src.scraper_ligas import ScraperLigas
 from src.config import ENDPOINT_LIGAS
 from src.database.conexion import Conexion
 from src.scraper_equipos import ScraperEquipos
+from src.scraper_info_equipo import ScraperInfoEquipo
 
 @pytest.fixture
 def scraper():
@@ -35,3 +36,8 @@ def conexion():
 def scraper_equipos():
 
     return ScraperEquipos("/en/country/clubs/ESP/Spain-Football-Clubs")
+
+@pytest.fixture
+def scraper_info_equipo():
+
+    return ScraperInfoEquipo("/en/squads/db3b9613/history/Atletico-Madrid-Stats-and-History")
