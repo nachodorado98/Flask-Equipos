@@ -4,9 +4,11 @@ from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
 import os
+import time
 
 from python.src.etl import extraerData, limpiarData, cargarData
 from python.src.etl_equipos import extraerDataEquipos, limpiarDataEquipos, cargarDataEquipos
+from python.src.etl_info_equipo import extraerDataInfoEquipo, limpiarDataInfoEquipo, cargarDataInfoEquipo
 from python.src.database.conexion import Conexion
 
 def existe_carpeta()->str:
@@ -15,7 +17,7 @@ def existe_carpeta()->str:
 
 def crearArchivoLog(motivo:str)->None:
 
-	archivo_log=f"log_{datetime.now().strftime('%Y%m%d_%H%M')}.txt"
+	archivo_log=f"log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
 
 	ruta_log=os.path.join(os.getcwd(), "dags", "logs", archivo_log)
 
@@ -67,6 +69,40 @@ def ETL_Equipos()->str:
 
 	print("ETL Equipos finalizada")
 
+	time.sleep(30)
+
+
+def ETL_Info_Equipos()->str:
+
+	conexion=Conexion()
+
+	equipos=conexion.obtenerIdUrlEquipos()
+
+	for id_equipo, url in equipos:
+
+		try:
+
+			print(f"ETL Info Equipo Id {id_equipo}")
+
+			data=extraerDataInfoEquipo(url)
+
+			data_limpia=limpiarDataInfoEquipo(data)
+
+			cargarDataInfoEquipo(data_limpia, id_equipo)
+
+		except Exception as e:
+
+			crearArchivoLog(f"ETL Info Equipo fallido {id_equipo}")
+
+		finally:
+
+			time.sleep(2)
+
+	conexion.cerrarConexion()
+
+	print("ETL Info Equipos finalizada")
+
+
 
 with DAG("dag_futbol",
 		start_date=datetime(2024,4,10),
@@ -84,8 +120,13 @@ with DAG("dag_futbol",
 
 	tarea_log_ligas=PythonOperator(task_id="log_ligas", python_callable=crearArchivoLog, op_kwargs={"motivo": "ETL Ligas fallido"})
 
-	tarea_etl_equipos=BranchPythonOperator(task_id="etl_equipos", python_callable=ETL_Equipos)
+	tarea_etl_equipos=PythonOperator(task_id="etl_equipos", python_callable=ETL_Equipos)
+
+	tarea_etl_info_equipos=PythonOperator(task_id="etl_info_equipos", python_callable=ETL_Info_Equipos)
 
 tarea_existe_carpeta >> [tarea_carpeta_logs, tarea_etl_ligas]
 
 tarea_carpeta_logs >> tarea_etl_ligas >> [tarea_log_ligas, tarea_etl_equipos]
+
+tarea_etl_equipos >> tarea_etl_info_equipos
+

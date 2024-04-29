@@ -15,3 +15,6 @@ class EquiposExistentesError(Exception):
 
 class InfoEquipoError(Exception):
     pass
+
+class UrlImagenExistenteError(Exception):
+    pass

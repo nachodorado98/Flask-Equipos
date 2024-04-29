@@ -88,3 +88,35 @@ class Conexion:
 		ligas=self.c.fetchall()
 
 		return None if not ligas else list(map(lambda liga: (liga["id"], liga["url"]), ligas))
+
+	# Metodo para actualizar la url de la imagen de un equipo
+	def actualizarUrlImagen(self, url_imagen:str, id_equipo:int)->None:
+
+		self.c.execute("""UPDATE equipos
+							SET Url_Imagen=%s
+							WHERE Id=%s""",
+							(url_imagen, id_equipo))
+
+		self.confirmar()
+
+	# Metodo para obtener el id equipo de un equipo
+	def obtenerIdEquipo(self, equipo:str)->Optional[int]:
+
+		self.c.execute("""SELECT Id
+							FROM equipos
+							WHERE Equipo=%s""",
+							(equipo,))
+
+		id_equipo=self.c.fetchone()
+
+		return None if id_equipo is None else id_equipo["id"]
+
+	# Metodo para obtener la informacion de los equipos
+	def obtenerIdUrlEquipos(self)->Optional[List[tuple]]:
+
+		self.c.execute("""SELECT Id, Url
+							FROM equipos""")
+
+		equipos=self.c.fetchall()
+
+		return None if not equipos else list(map(lambda equipo: (equipo["id"], equipo["url"]), equipos))

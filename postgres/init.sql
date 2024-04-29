@@ -12,4 +12,5 @@ CREATE TABLE equipos (Id SERIAL PRIMARY KEY,
 						Url VARCHAR(255),
 						Equipo_Url VARCHAR(255),
 						Id_Liga INTEGER,
+						Url_Imagen VARCHAR(255) DEFAULT NULL,
 						FOREIGN KEY (id_Liga) REFERENCES ligas (Id) ON DELETE CASCADE);
