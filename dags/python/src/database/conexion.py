@@ -120,3 +120,27 @@ class Conexion:
 		equipos=self.c.fetchall()
 
 		return None if not equipos else list(map(lambda equipo: (equipo["id"], equipo["url"]), equipos))
+
+	# Metodo para obtener la url imagen de un equipo por su id
+	def obtenerUrlImagen(self, id_equipo:int)->Optional[str]:
+
+		self.c.execute("""SELECT Url_Imagen
+							FROM equipos
+							WHERE Id=%s""",
+							(id_equipo,))
+
+		url_imagen=self.c.fetchone()
+
+		return None if url_imagen is None else url_imagen["url_imagen"]
+
+	# Metodo para obtener el nombre del equipo url por su id
+	def obtenerNombreEquipoUrl(self, id_equipo:int)->Optional[str]:
+
+		self.c.execute("""SELECT Equipo_Url
+							FROM equipos
+							WHERE Id=%s""",
+							(id_equipo,))
+
+		equipo_url=self.c.fetchone()
+
+		return None if equipo_url is None else equipo_url["equipo_url"]

@@ -10,16 +10,17 @@ from python.src.etl import extraerData, limpiarData, cargarData
 from python.src.etl_equipos import extraerDataEquipos, limpiarDataEquipos, cargarDataEquipos
 from python.src.etl_info_equipo import extraerDataInfoEquipo, limpiarDataInfoEquipo, cargarDataInfoEquipo
 from python.src.database.conexion import Conexion
+from python.src.utils import descargar, realizarDescarga
 
-def existe_carpeta()->str:
+def existe_entorno()->str:
 
-	return "etl_ligas" if os.path.exists(os.path.join(os.getcwd(), "dags", "logs")) else "carpeta_logs"
+	return "etl_ligas" if os.path.exists(os.path.join(os.getcwd(), "dags", "entorno")) else "carpeta_entorno"
 
 def crearArchivoLog(motivo:str)->None:
 
 	archivo_log=f"log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
 
-	ruta_log=os.path.join(os.getcwd(), "dags", "logs", archivo_log)
+	ruta_log=os.path.join(os.getcwd(), "dags", "entorno", "logs", archivo_log)
 
 	with open(ruta_log, "w") as archivo:
 
@@ -43,7 +44,7 @@ def ETL_Ligas()->str:
 
 		return "log_ligas"
 
-def ETL_Equipos()->str:
+def ETL_Equipos()->None:
 
 	conexion=Conexion()
 
@@ -71,8 +72,7 @@ def ETL_Equipos()->str:
 
 	time.sleep(30)
 
-
-def ETL_Info_Equipos()->str:
+def ETL_Info_Equipos()->None:
 
 	conexion=Conexion()
 
@@ -84,11 +84,23 @@ def ETL_Info_Equipos()->str:
 
 			print(f"ETL Info Equipo Id {id_equipo}")
 
+			url_imagen=conexion.obtenerUrlImagen(id_equipo)
+
 			data=extraerDataInfoEquipo(url)
 
 			data_limpia=limpiarDataInfoEquipo(data)
 
 			cargarDataInfoEquipo(data_limpia, id_equipo)
+
+			if descargar(data_limpia, url_imagen):
+
+				ruta_imagenes=os.path.join(os.getcwd(), "dags", "entorno", "imagenes")
+
+				nombre_imagen=conexion.obtenerNombreEquipoUrl(id_equipo)
+
+				print(f"Descargando imagen {nombre_imagen}...")
+
+				realizarDescarga(data_limpia, ruta_imagenes, nombre_imagen)
 
 		except Exception as e:
 
@@ -103,18 +115,25 @@ def ETL_Info_Equipos()->str:
 	print("ETL Info Equipos finalizada")
 
 
-
 with DAG("dag_futbol",
 		start_date=datetime(2024,4,10),
 		description="DAG para obtener datos de la web de futbol",
 		schedule_interval=None,
 		catchup=False) as dag:
 
-	tarea_existe_carpeta=BranchPythonOperator(task_id="existe_carpeta", python_callable=existe_carpeta)
+	tarea_existe_entorno=BranchPythonOperator(task_id="existe_entorno", python_callable=existe_entorno)
 
-	comando_bash="cd ../../opt/airflow/dags && mkdir logs"
+	comando_bash_entorno="cd ../../opt/airflow/dags && mkdir entorno"
 
-	tarea_carpeta_logs=BashOperator(task_id="carpeta_logs", bash_command=comando_bash)
+	comando_bash_logs="cd ../../opt/airflow/dags/entorno && mkdir logs"
+
+	comando_bash_imagenes="cd ../../opt/airflow/dags/entorno && mkdir imagenes"
+
+	tarea_carpeta_entorno=BashOperator(task_id="carpeta_entorno", bash_command=comando_bash_entorno)
+
+	tarea_carpeta_logs=BashOperator(task_id="carpeta_logs", bash_command=comando_bash_logs)
+
+	tarea_carpeta_imagenes=BashOperator(task_id="carpeta_imagenes", bash_command=comando_bash_imagenes)
 
 	tarea_etl_ligas=BranchPythonOperator(task_id="etl_ligas", python_callable=ETL_Ligas, trigger_rule="none_failed_min_one_success")
 
@@ -124,9 +143,9 @@ with DAG("dag_futbol",
 
 	tarea_etl_info_equipos=PythonOperator(task_id="etl_info_equipos", python_callable=ETL_Info_Equipos)
 
-tarea_existe_carpeta >> [tarea_carpeta_logs, tarea_etl_ligas]
+tarea_existe_entorno >> [tarea_carpeta_entorno, tarea_etl_ligas]
 
-tarea_carpeta_logs >> tarea_etl_ligas >> [tarea_log_ligas, tarea_etl_equipos]
+tarea_carpeta_entorno >> tarea_carpeta_logs >> tarea_carpeta_imagenes >> tarea_etl_ligas >> [tarea_log_ligas, tarea_etl_equipos]
 
 tarea_etl_equipos >> tarea_etl_info_equipos
 

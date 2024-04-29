@@ -18,3 +18,6 @@ class InfoEquipoError(Exception):
 
 class UrlImagenExistenteError(Exception):
     pass
+
+class DescargaImagenError(Exception):
+    pass

@@ -146,3 +146,68 @@ def test_obtener_id_url_equipos_existen(conexion, equipos, numero):
 	lista_equipos=conexion.obtenerIdUrlEquipos()
 
 	assert len(lista_equipos)==numero
+
+def test_obtener_url_imagen_equipo_no_existe(conexion):
+
+	assert conexion.obtenerUrlImagen(1) is None
+
+def test_obtener_url_imagen_equipo_existe_no_tiene(conexion):
+
+	liga=["España", "url", "ESP"]
+
+	conexion.insertarLiga(liga)
+
+	id_liga=conexion.obtenerIdLiga("España")
+
+	equipo=["Atlético Madrid", "url", "atleti", id_liga]
+
+	conexion.insertarEquipo(equipo)
+
+	id_equipo=conexion.obtenerIdEquipo("Atlético Madrid")
+
+	assert conexion.obtenerUrlImagen(id_equipo) is None
+
+def test_obtener_url_imagen_equipo(conexion):
+
+	liga=["España", "url", "ESP"]
+
+	conexion.insertarLiga(liga)
+
+	id_liga=conexion.obtenerIdLiga("España")
+
+	equipo=["Atlético Madrid", "url", "atleti", id_liga]
+
+	conexion.insertarEquipo(equipo)
+
+	id_equipo=conexion.obtenerIdEquipo("Atlético Madrid")
+
+	url_imagen="www.imagen.png"
+
+	conexion.actualizarUrlImagen(url_imagen, id_equipo)
+
+	assert conexion.obtenerUrlImagen(id_equipo)==url_imagen
+
+def test_obtener_nombre_equipo_url_no_existe(conexion):
+
+	assert conexion.obtenerNombreEquipoUrl(1) is None
+
+@pytest.mark.parametrize(["nombre"],
+	[("atleti",),("nacho",),("atleti-madrid",),("equipo de futbol",)]
+)
+def test_obtener_nombre_equipo_url(conexion, nombre):
+
+	liga=["España", "url", "ESP"]
+
+	conexion.insertarLiga(liga)
+
+	id_liga=conexion.obtenerIdLiga("España")
+
+	equipo=["Atlético Madrid", "url", nombre, id_liga]
+
+	conexion.insertarEquipo(equipo)
+
+	id_equipo=conexion.obtenerIdEquipo("Atlético Madrid")
+
+	nombre_equipo_url=conexion.obtenerNombreEquipoUrl(id_equipo)
+
+	assert nombre_equipo_url==nombre
