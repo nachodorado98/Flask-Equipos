@@ -10,6 +10,7 @@ from src.config import ENDPOINT_LIGAS
 from src.database.conexion import Conexion
 from src.scraper_equipos import ScraperEquipos
 from src.scraper_info_equipo import ScraperInfoEquipo
+from src.datalake.conexion_data_lake import ConexionDataLake
 
 @pytest.fixture
 def scraper():
@@ -41,3 +42,8 @@ def scraper_equipos():
 def scraper_info_equipo():
 
     return ScraperInfoEquipo("/en/squads/db3b9613/history/Atletico-Madrid-Stats-and-History")
+
+@pytest.fixture(scope="function")
+def datalake():
+
+    return ConexionDataLake()
