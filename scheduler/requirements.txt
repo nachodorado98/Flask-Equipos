@@ -4,3 +4,5 @@ psycopg2-binary==2.9.9
 pytest==8.1.1
 requests==2.31.0
 wget==3.2
+azure-identity==1.16.0
+azure-storage-file-datalake==12.14.0
