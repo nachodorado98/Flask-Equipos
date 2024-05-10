@@ -1,7 +1,8 @@
 import pytest
 import os
+import time
 
-from src.utils import descargar, realizarDescarga
+from src.utils import descargar, realizarDescarga, entorno_creado, crearEntornoDataLake
 from src.excepciones import DescargaImagenError
 
 @pytest.mark.parametrize(["nueva", "antigua"],
@@ -72,3 +73,29 @@ def test_realizar_descarga():
 	vaciarCarpeta(ruta_carpeta)
 
 	borrarCarpeta(ruta_carpeta)
+
+def test_entorno_creado_no_creado():
+
+	assert not entorno_creado("contenedor3")
+
+def test_entorno_creado(datalake):
+
+	datalake.crearContenedor("contenedor3")
+
+	time.sleep(5)
+
+	assert entorno_creado("contenedor3")
+
+	datalake.eliminarContenedor("contenedor3")
+
+	datalake.cerrarConexion()
+
+def test_crear_entorno_data_lake(datalake):
+
+	crearEntornoDataLake("contenedor4", "carpeta4")
+
+	time.sleep(5)
+
+	assert entorno_creado("contenedor4")
+
+	datalake.eliminarContenedor("contenedor4")

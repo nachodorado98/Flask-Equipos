@@ -10,7 +10,8 @@ from python.src.etl import extraerData, limpiarData, cargarData
 from python.src.etl_equipos import extraerDataEquipos, limpiarDataEquipos, cargarDataEquipos
 from python.src.etl_info_equipo import extraerDataInfoEquipo, limpiarDataInfoEquipo, cargarDataInfoEquipo
 from python.src.database.conexion import Conexion
-from python.src.utils import descargar, realizarDescarga
+from python.src.utils import descargar, realizarDescarga, entorno_creado, crearEntornoDataLake
+from python.src.datalake.conexion_data_lake import ConexionDataLake
 
 def existe_entorno()->str:
 
@@ -114,6 +115,34 @@ def ETL_Info_Equipos()->None:
 
 	print("ETL Info Equipos finalizada")
 
+def data_lake_disponible()->str:
+
+	try:
+
+		con=ConexionDataLake()
+
+		con.cerrarConexion()
+
+		return "entorno_data_lake_creado"
+
+	except Exception:
+
+		return "log_data_lake"
+
+def entorno_data_lake_creado():
+
+	if not entorno_creado("contenedorequipos"):
+
+		return "crear_entorno_data_lake"
+
+	return "entorno_creado"
+
+def creacion_entorno_data_lake()->None:
+
+	crearEntornoDataLake("contenedorequipos", "escudos")
+
+	print("Entorno Data Lake creado")
+
 
 with DAG("dag_futbol",
 		start_date=datetime(2024,4,10),
@@ -143,9 +172,24 @@ with DAG("dag_futbol",
 
 	tarea_etl_info_equipos=PythonOperator(task_id="etl_info_equipos", python_callable=ETL_Info_Equipos)
 
+	tarea_data_lake_disponible=BranchPythonOperator(task_id="data_lake_disponible", python_callable=data_lake_disponible)
+
+	tarea_log_data_lake=PythonOperator(task_id="log_data_lake", python_callable=crearArchivoLog, op_kwargs={"motivo": "Error en la conexion con el Data Lake"})
+
+	tarea_entorno_data_lake_creado=BranchPythonOperator(task_id="entorno_data_lake_creado", python_callable=entorno_data_lake_creado)
+
+	tarea_crear_entorno_data_lake=PythonOperator(task_id="crear_entorno_data_lake", python_callable=creacion_entorno_data_lake)
+
+	tarea_entorno_creado=DummyOperator(task_id="entorno_creado", trigger_rule="none_failed_min_one_success")
+
+
 tarea_existe_entorno >> [tarea_carpeta_entorno, tarea_etl_ligas]
 
 tarea_carpeta_entorno >> tarea_carpeta_logs >> tarea_carpeta_imagenes >> tarea_etl_ligas >> [tarea_log_ligas, tarea_etl_equipos]
 
-tarea_etl_equipos >> tarea_etl_info_equipos
+tarea_etl_equipos >> tarea_etl_info_equipos >> tarea_data_lake_disponible >> [tarea_entorno_data_lake_creado, tarea_log_data_lake]
+
+tarea_entorno_data_lake_creado >> [tarea_crear_entorno_data_lake, tarea_entorno_creado]
+
+tarea_crear_entorno_data_lake >> tarea_entorno_creado
 
