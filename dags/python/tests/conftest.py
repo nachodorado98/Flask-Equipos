@@ -11,6 +11,7 @@ from src.database.conexion import Conexion
 from src.scraper_equipos import ScraperEquipos
 from src.scraper_info_equipo import ScraperInfoEquipo
 from src.datalake.conexion_data_lake import ConexionDataLake
+from src.scraper_partidos import ScraperPartidos
 
 @pytest.fixture
 def scraper():
@@ -47,3 +48,8 @@ def scraper_info_equipo():
 def datalake():
 
     return ConexionDataLake()
+
+@pytest.fixture
+def scraper_partidos():
+
+    return ScraperPartidos("2019-04-13")
