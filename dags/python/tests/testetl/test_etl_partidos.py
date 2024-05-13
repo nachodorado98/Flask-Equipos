@@ -3,7 +3,7 @@ import pandas as pd
 import time
 from datetime import datetime, timedelta
 
-from src.etl_partidos import extraerDataPartidos, limpiarDataPartidos
+from src.etl_partidos import extraerDataPartidos, limpiarDataPartidos, cargarDataPartidos
 from src.excepciones import ErrorFechaFormato, ErrorFechaPosterior, PartidosExtraidosError, PartidosLimpiarError
 from src.database.conexion import Conexion
 
@@ -146,3 +146,35 @@ def test_limpiar_partidos_varios_equipos(conexion):
 	assert isinstance(data_limpia, pd.DataFrame)
 	assert not data_limpia.empty
 	assert data_limpia.shape[0]==4
+
+def test_cargar_partidos(conexion):
+
+	liga=["España", "url", "ESP"]
+
+	conexion.insertarLiga(liga)
+
+	id_liga=conexion.obtenerIdLiga("España")
+
+	urls=["/en/squads/361ca564/history/Tottenham-Hotspur-Stats-and-History",
+			"/en/squads/f5922ca5/history/Huddersfield-Town-Stats-and-History",
+			"/en/squads/19538871/history/Manchester-United-Stats-and-History",
+			"/en/squads/db3b9613/history/Atletico-Madrid-Stats-and-History",
+			"/en/squads/206d90db/history/Barcelona-Stats-and-History"]
+
+	for url in urls:
+
+		equipo=["Atlético Madrid", url, "Atleti", id_liga]
+
+		conexion.insertarEquipo(equipo)
+
+	data=extraerDataPartidos("2019-04-13")
+
+	data_limpia=limpiarDataPartidos(data)
+
+	cargarDataPartidos(data_limpia)
+
+	conexion.c.execute("SELECT * FROM partidos")
+
+	assert len(conexion.c.fetchall())==4
+
+	time.sleep(60)

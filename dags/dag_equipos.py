@@ -150,9 +150,9 @@ def subirEscudosDataLake()->None:
 	subirArchivosDataLake("contenedorequipos", "escudos", ruta_imagenes)
 
 
-with DAG("dag_futbol",
-		start_date=datetime(2024,5,12),
-		description="DAG para obtener datos de la web de futbol",
+with DAG("dag_equipos",
+		start_date=datetime(2024,5,13),
+		description="DAG para obtener datos de los equipos de la web de futbol",
 		schedule_interval=None,
 		catchup=False) as dag:
 

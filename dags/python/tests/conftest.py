@@ -30,6 +30,8 @@ def conexion():
 
     con.c.execute("DELETE FROM ligas")
 
+    con.c.execute("DELETE FROM partidos")
+
     con.confirmar()
 
     return con

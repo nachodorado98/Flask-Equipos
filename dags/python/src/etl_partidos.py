@@ -55,6 +55,16 @@ def limpiarDataPartidos(tabla:pd.DataFrame)->pd.DataFrame:
 
 		raise PartidosLimpiarError("No hay partidos este dia")
 
-	tabla_columnas_seleccionadas=tabla_filtrada[["Competicion", "Round", "Fecha", "Time", "Home", "Score", "Away", "Attendance", "Venue"]]
+	tabla_columnas_seleccionadas=tabla_filtrada[["Competicion", "Round", "Fecha", "Time", "Home", "Score", "Away", "Attendance", "Venue", "CodEquipo1", "CodEquipo2"]]
 
 	return tabla_columnas_seleccionadas.reset_index(drop=True)
+
+def cargarDataPartidos(tabla:pd.DataFrame)->None:
+
+	conexion=Conexion()
+
+	partidos=tabla.values.tolist()
+
+	conexion.insertarPartidos(partidos)
+
+	conexion.cerrarConexion()

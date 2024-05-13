@@ -154,4 +154,21 @@ class Conexion:
 
 		codigo=self.c.fetchone()
 
-		return False if codigo is None else True 
+		return False if codigo is None else True
+
+	#Metodo para insertar un partido
+	def insertarPartido(self, partido:List[str])->None:
+
+		self.c.execute("""INSERT INTO partidos (competicion, ronda, fecha, hora,
+							local, marcador, visitante, publico, sede, codequipo1, codequipo2)
+							VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+							tuple(partido))
+
+		self.confirmar()
+
+	#Metodo para insertar multiples partidos
+	def insertarPartidos(self, partidos:List[List])->None:
+
+		for partido in partidos:
+
+			self.insertarPartido(partido)
