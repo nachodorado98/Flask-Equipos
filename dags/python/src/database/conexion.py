@@ -144,3 +144,14 @@ class Conexion:
 		equipo_url=self.c.fetchone()
 
 		return None if equipo_url is None else equipo_url["equipo_url"]
+
+	# Metodo para comprobar que existe el codigo del equipo
+	def comprobarCodigo(self, codigo:str)->bool:
+
+		self.c.execute(f"""SELECT *
+							FROM equipos
+							WHERE Url LIKE '%{codigo}%'""")
+
+		codigo=self.c.fetchone()
+
+		return False if codigo is None else True 

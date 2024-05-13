@@ -211,3 +211,37 @@ def test_obtener_nombre_equipo_url(conexion, nombre):
 	nombre_equipo_url=conexion.obtenerNombreEquipoUrl(id_equipo)
 
 	assert nombre_equipo_url==nombre
+
+@pytest.mark.parametrize(["codigo"],
+	[("1235",),("54codigo",),("url2",),("url12345codig0",)]
+)
+def test_comprobar_codigo_no_existe(conexion, codigo):
+
+	liga=["España", "url", "ESP"]
+
+	conexion.insertarLiga(liga)
+
+	id_liga=conexion.obtenerIdLiga("España")
+
+	equipo=["Atlético Madrid", "url12345codigo", "Atleti", id_liga]
+
+	conexion.insertarEquipo(equipo)
+
+	assert not conexion.comprobarCodigo(codigo)
+
+@pytest.mark.parametrize(["codigo"],
+	[("12345",),("45codigo",),("url1",),("url12345codig",)]
+)
+def test_comprobar_codigo(conexion, codigo):
+
+	liga=["España", "url", "ESP"]
+
+	conexion.insertarLiga(liga)
+
+	id_liga=conexion.obtenerIdLiga("España")
+
+	equipo=["Atlético Madrid", "url12345codigo", "Atleti", id_liga]
+
+	conexion.insertarEquipo(equipo)
+
+	assert conexion.comprobarCodigo(codigo)
