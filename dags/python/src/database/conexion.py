@@ -172,3 +172,21 @@ class Conexion:
 		for partido in partidos:
 
 			self.insertarPartido(partido)
+
+	# Metodo para saber si la tabla (partidos por defecto) esta vacia
+	def tabla_vacia(self, tabla:str="partidos")->bool:
+
+		self.c.execute(f"""SELECT *
+							FROM {tabla}""")
+
+		return True if not self.c.fetchall() else False
+
+	# Metodo para obtener la fecha maxima de la tabla
+	def fecha_maxima(self)->Optional[str]:
+
+		self.c.execute("""SELECT MAX(fecha) as fecha_maxima
+							FROM partidos""")
+
+		fecha_maxima=self.c.fetchone()["fecha_maxima"]
+
+		return None if fecha_maxima is None else fecha_maxima.strftime("%Y-%m-%d")

@@ -1,8 +1,10 @@
 import pytest
 import os
 import time
+from datetime import datetime, timedelta
 
 from src.utils import descargar, realizarDescarga, entorno_creado, crearEntornoDataLake, subirArchivosDataLake
+from src.utils import obtenerFechaInicio, generarFechas, fechas_etl, etl_partidos_disponibles
 from src.excepciones import DescargaImagenError
 
 @pytest.mark.parametrize(["nueva", "antigua"],
@@ -230,3 +232,143 @@ def test_subir_archivo_data_lake_archivos_existentes_no_existentes(datalake):
 	vaciarCarpeta(ruta_carpeta)
 
 	borrarCarpeta(ruta_carpeta)
+
+@pytest.mark.parametrize(["fecha_inicio"],
+	[("2024-01-01",), ("2024-05-10",), ("2010-06-22",),("1998-02-16",)]
+)
+def test_obtener_fecha_inicio_tabla_vacia(conexion, fecha_inicio):
+
+	assert obtenerFechaInicio(fecha_inicio)==fecha_inicio
+
+def test_obtener_fecha_inicio_tabla_registro(conexion):
+
+	partido=["Champions", "Final", "2019-06-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"]
+
+	conexion.insertarPartido(partido)
+
+	assert obtenerFechaInicio("2019-04-13")=="2019-06-23"
+
+def test_obtener_fecha_inicio_tabla_registros(conexion):
+
+	partidos=[["Champions", "Final", "2019-06-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2020-06-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2019-07-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2023-06-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2024-04-13","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2022-06-13","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"]]
+
+	conexion.insertarPartidos(partidos)
+
+	assert obtenerFechaInicio("2024-01-01")=="2024-04-14"
+
+@pytest.mark.parametrize(["inicio", "fin"],
+	[
+		("2019-06-22", "2019-04-13"),
+		("2023-06-22", "2019-04-13"),
+		("2019-06-22", "2019-06-21"),
+		("2019-07-22", "2019-04-13"),
+		("2019-06-22", "2019-06-13")
+	]
+)
+def test_generar_fechas_inicio_superior(inicio, fin):
+
+	assert not generarFechas(inicio, fin)
+
+def test_generar_fechas_inicio_fin_iguales():
+
+	assert len(generarFechas("2019-06-22", "2019-06-22"))==1
+
+def test_fechas_etl_tabla_vacia(conexion):
+
+	fechas=fechas_etl()
+
+	assert fechas[0]=="2024-01-01"
+	assert fechas[-1]==(datetime.now().date()-timedelta(days=3)).strftime("%Y-%m-%d")
+
+def test_fechas_etl_tabla_registro(conexion):
+
+	partido=["Champions", "Final", "2024-01-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"]
+
+	conexion.insertarPartido(partido)
+
+	fechas=fechas_etl()
+
+	assert fechas[0]=="2024-01-23"
+	assert fechas[-1]==(datetime.now().date()-timedelta(days=3)).strftime("%Y-%m-%d")
+
+def test_fechas_etl_tabla_registros(conexion):
+
+	partidos=[["Champions", "Final", "2019-06-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2020-06-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2019-07-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2023-06-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2024-01-21","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2022-06-13","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"]]
+
+	conexion.insertarPartidos(partidos)
+
+	fechas=fechas_etl()
+
+	assert fechas[0]=="2024-01-22"
+	assert fechas[-1]==(datetime.now().date()-timedelta(days=3)).strftime("%Y-%m-%d")
+
+def test_fechas_etl_tabla_dia_anterior(conexion):
+
+	dia_anterior=(datetime.now().date()-timedelta(days=4)).strftime("%Y-%m-%d")
+	dia_ultimo=(datetime.now().date()-timedelta(days=3)).strftime("%Y-%m-%d")
+
+	partidos=[["Champions", "Final", "2019-06-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2020-06-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2019-07-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2023-06-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", dia_anterior,"21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2022-06-13","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"]]
+
+	conexion.insertarPartidos(partidos)
+
+	fechas=fechas_etl()
+
+	assert fechas[0]==dia_ultimo
+	assert fechas[-1]==dia_ultimo
+	assert len(fechas)==1
+
+def test_fechas_etl_tabla_dia_ultimo(conexion):
+
+	dia_ultimo=(datetime.now().date()-timedelta(days=3)).strftime("%Y-%m-%d")
+
+	partidos=[["Champions", "Final", "2019-06-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2020-06-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2019-07-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2023-06-22","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", dia_ultimo,"21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"],
+				["Champions", "Final", "2022-06-13","21:00", "ATM", "5-0", "Madrid", 12345, "Calderon", "Cod1", "Cod2"]]
+
+	conexion.insertarPartidos(partidos)
+
+	assert not fechas_etl()
+
+def test_etl_partidos_disponibles_no_ligas_no_equipos(conexion):
+
+	assert not etl_partidos_disponibles()
+
+def test_etl_partidos_disponibles_no_equipos(conexion):
+
+	liga=["España", "url", "ESP"]
+
+	conexion.insertarLiga(liga)
+
+	assert not etl_partidos_disponibles()
+
+def test_etl_partidos_disponibles(conexion):
+
+	liga=["España", "url", "ESP"]
+
+	conexion.insertarLiga(liga)
+
+	id_liga=conexion.obtenerIdLiga("España")
+
+	equipo=["Atlético Madrid", "url12345codigo", "Atleti", id_liga]
+
+	conexion.insertarEquipo(equipo)
+
+	assert etl_partidos_disponibles()

@@ -1,8 +1,11 @@
 import wget
 import os
+from datetime import datetime, timedelta
+from typing import List, Optional
 
 from .excepciones import DescargaImagenError
 from .datalake.conexion_data_lake import ConexionDataLake
+from .database.conexion import Conexion
 
 # Funcion para verificar si hay que descargar o no la imagen
 def descargar(url_nueva:str, url_antigua:str)->bool:
@@ -63,3 +66,61 @@ def subirArchivosDataLake(nombre_contenedor:str, nombre_carpeta:str, ruta_local_
 		if archivo_local not in archivos_carpeta_contenedor_limpios:
 
 			datalake.subirArchivo(nombre_contenedor, nombre_carpeta, ruta_local_carpeta, archivo_local)
+
+def obtenerFechaInicio(fecha_inicio:str)->str:
+
+	con=Conexion()
+
+	if con.tabla_vacia():
+
+		inicio=fecha_inicio
+
+	else:
+
+		ultima_fecha=con.fecha_maxima()
+
+		ultima_fecha_datetime=datetime.strptime(ultima_fecha, "%Y-%m-%d")
+
+		inicio=(ultima_fecha_datetime+timedelta(days=1)).strftime("%Y-%m-%d")
+
+	con.cerrarConexion()
+
+	return inicio
+
+def generarFechas(inicio:str, fin:str)->List[Optional[str]]:
+
+	inicio_datetime=datetime.strptime(inicio, "%Y-%m-%d")
+
+	fin_datetime=datetime.strptime(fin, "%Y-%m-%d")
+
+	fechas=[]
+
+	while inicio_datetime<=fin_datetime:
+
+		fechas.append(inicio_datetime.strftime("%Y-%m-%d"))
+
+		inicio_datetime+=timedelta(days=1)
+
+	return fechas
+
+def fechas_etl(fecha_inicio:str="2024-01-01")->List[Optional[str]]:
+
+	inicio=obtenerFechaInicio(fecha_inicio)
+
+	fin=(datetime.now().date()-timedelta(days=3)).strftime("%Y-%m-%d")
+
+	return generarFechas(inicio, fin)
+
+def etl_partidos_disponibles()->bool:
+
+	con=Conexion()
+
+	if con.tabla_vacia("ligas") or con.tabla_vacia("equipos"):
+
+		con.cerrarConexion()
+
+		return False
+
+	con.cerrarConexion()
+
+	return True
