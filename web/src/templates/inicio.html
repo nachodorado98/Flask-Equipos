@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/inicio.css') }}">
+    <title>Partidos</title>
+</head>
+<body>
+
+    <div class="contenido-principal">
+
+        {% block titulo %}
+
+        <h1>Partidos Del {{ fecha_bonita }}</h1>
+
+        {% endblock titulo %}
+
+        {% block navbar %}
+
+        <button id="toggle-navbar" class="toggle-button">
+            <img src="{{ url_for('static', filename='imagenes/hamburguesa.png') }}" alt="Hamburguesa Icon" width="18" height="18">
+        </button>
+
+        <div class="navbar" id="navbar">
+            <ul>
+                <li><a href="/">Ultimos partidos</a></li>
+            </ul>
+        </div>
+
+        {% endblock navbar %}
+
+        {% block principal %}
+
+        {% if partidos %}
+
+             <div class="tarjetas-partidos">
+                <div class="tarjetas-partidos-wrapper">
+
+                    {% for partido in partidos %}
+                        <div class="tarjeta-partido">
+                            <p><strong>{{ partido[0] }}</strong> - {{ partido[1] }}</p>
+                            <h3>{{ partido[2] }} {{ partido[3] }} {{ partido[4] }}</h3>
+                        </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+
+        {% else %}
+
+            <p class="mensaje-no-partidos">No hay partidos este dia</p>
+
+        {% endif %}
+
+        <div class="contenedor-botones">
+            <a href="/?fecha={{ dia_anterior }}" class="boton-anterior{% if minima %} boton-anterior-deshabilitado{% endif %}" {% if minima %}onclick="return false;" disabled{% endif %}>
+            << Día Anterior
+            </a>
+            <a href="/?fecha={{ dia_siguiente }}" class="boton-siguiente{% if maxima %} boton-siguiente-deshabilitado{% endif %}" {% if maxima %}onclick="return false;" disabled{% endif %}>
+            Día Siguiente >>
+            </a>
+        </div>
+
+        {% endblock principal %}
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+
+    <footer>
+        <p>&copy; 2024 Partidos App. Todos los derechos reservados.</p>
+    </footer>
+
+</body>
+</html>
