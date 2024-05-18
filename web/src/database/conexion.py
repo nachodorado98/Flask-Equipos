@@ -42,10 +42,16 @@ class Conexion:
 	# Metodo para obtener los partidos de una fecha
 	def obtenerPartidosFecha(self, fecha:str)->Optional[List[tuple]]:
 
-		self.c.execute("""SELECT competicion, ronda, local, marcador, visitante, fecha
-						FROM partidos
-						WHERE fecha=%s""",
-						(fecha,))
+		self.c.execute("""SELECT p.competicion, p.ronda, p.local, p.marcador, p.visitante, p.fecha, 
+								CASE WHEN e1.equipo_url IS NULL THEN 'no-imagen' ELSE e1.equipo_url END as local_imagen, 
+								CASE WHEN e2.equipo_url IS NULL THEN 'no-imagen' ELSE e2.equipo_url END as visitante_imagen
+							FROM partidos p
+							LEFT JOIN equipos e1
+							ON p.CodEquipo1=e1.codigo_url 
+							LEFT JOIN equipos e2
+							ON p.CodEquipo2=e2.codigo_url
+							WHERE fecha=%s""",
+							(fecha,))
 
 		partidos=self.c.fetchall()
 
@@ -54,7 +60,9 @@ class Conexion:
 											partido["local"],
 											partido["marcador"],
 											partido["visitante"],
-											partido["fecha"].strftime("%d-%m-%Y")), partidos)) if partidos else None
+											partido["fecha"].strftime("%d-%m-%Y"),
+											partido["local_imagen"],
+											partido["visitante_imagen"]), partidos)) if partidos else None
 
 	# Metodo para saber si la tabla partidos esta vacia
 	def tabla_partidos_vacia(self)->bool:

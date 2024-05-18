@@ -12,6 +12,7 @@ from python.src.etl_info_equipo import extraerDataInfoEquipo, limpiarDataInfoEqu
 from python.src.database.conexion import Conexion
 from python.src.utils import descargar, realizarDescarga, entorno_creado, crearEntornoDataLake, subirArchivosDataLake
 from python.src.datalake.conexion_data_lake import ConexionDataLake
+from python.src.datalake.confconexiondatalake import CONTENEDOR, CARPETA
 
 def existe_entorno()->str:
 
@@ -131,7 +132,7 @@ def data_lake_disponible()->str:
 
 def entorno_data_lake_creado():
 
-	if not entorno_creado("contenedorequipos"):
+	if not entorno_creado(CONTENEDOR):
 
 		return "crear_entorno_data_lake"
 
@@ -139,7 +140,7 @@ def entorno_data_lake_creado():
 
 def creacion_entorno_data_lake()->None:
 
-	crearEntornoDataLake("contenedorequipos", "escudos")
+	crearEntornoDataLake(CONTENEDOR, CARPETA)
 
 	print("Entorno Data Lake creado")
 
@@ -147,7 +148,7 @@ def subirEscudosDataLake()->None:
 
 	ruta_imagenes=os.path.join(os.getcwd(), "dags", "entorno", "imagenes")
 
-	subirArchivosDataLake("contenedorequipos", "escudos", ruta_imagenes)
+	subirArchivosDataLake(CONTENEDOR, CARPETA, ruta_imagenes)
 
 
 with DAG("dag_equipos",
