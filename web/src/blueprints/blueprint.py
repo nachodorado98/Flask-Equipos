@@ -4,7 +4,7 @@ from datetime import datetime
 from src.database.conexion import Conexion
 
 from src.utilidades.utils import fecha_formato_correcto, fecha_anterior, fecha_siguiente, fecha_bonita
-from src.utilidades.utils import es_maxima, es_minima
+from src.utilidades.utils import es_maxima, es_minima, fecha_disponible
 
 bp_inicio=Blueprint("inicio", __name__)
 
@@ -31,6 +31,12 @@ def inicio():
 
 		return redirect("/")
 
+	if not fecha_disponible(fecha, fecha_minima, fecha_maxima):
+
+		con.cerrarConexion()
+
+		return redirect("/")
+
 	dia_anterior, dia_siguiente=fecha_anterior(fecha), fecha_siguiente(fecha)
 
 	partidos=con.obtenerPartidosFecha(fecha)
@@ -44,4 +50,6 @@ def inicio():
 							dia_siguiente=dia_siguiente,
 							partidos=partidos,
 							maxima=es_maxima(fecha, fecha_maxima),
-							minima=es_minima(fecha, fecha_minima))
+							minima=es_minima(fecha, fecha_minima),
+							fecha_minima=fecha_minima,
+							fecha_maxima=fecha_maxima)

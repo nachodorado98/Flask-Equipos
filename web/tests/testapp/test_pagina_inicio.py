@@ -62,6 +62,23 @@ def test_pagina_inicial_formato_correcto(cliente):
 @pytest.mark.parametrize(["fecha"],
 	[
 		("2019-06-20",),
+		("2003-02-01",),
+		("2032-02-22",)
+	]
+)
+def test_pagina_inicial_fecha_no_disponible(cliente, fecha):
+
+	respuesta=cliente.get(f"/?fecha={fecha}")
+
+	contenido=respuesta.data.decode()
+
+	respuesta.status_code==302
+	assert respuesta.location=="/"
+	assert "Redirecting..." in contenido
+
+@pytest.mark.parametrize(["fecha"],
+	[
+		("2019-06-26",),
 		("2023-02-01",),
 		("2022-02-22",)
 	]

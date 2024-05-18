@@ -1,7 +1,8 @@
 import pytest
+from datetime import datetime, timedelta
 
 from src.utilidades.utils import fecha_formato_correcto, fecha_anterior, fecha_siguiente, fecha_bonita
-from src.utilidades.utils import es_maxima, es_minima
+from src.utilidades.utils import es_maxima, es_minima, fecha_disponible
 
 @pytest.mark.parametrize(["fecha"],
 	[("fecha",),("1111",),("2019-01-111",),("2011-0216",),("22062019",),("2019/06/22",)]
@@ -84,3 +85,65 @@ def test_fecha_es_minima():
 	fecha_minima="2019-03-05"
 
 	assert es_minima(fecha_minima, fecha_minima)
+
+def test_fecha_disponible_fecha_minima():
+
+	fecha_minima="2019-03-05"
+	fecha_maxima="2024-03-05"
+
+	assert fecha_disponible(fecha_minima, fecha_minima, fecha_maxima)
+
+def test_fecha_disponible_fecha_maxima():
+
+	fecha_minima="2019-03-05"
+	fecha_maxima="2024-03-05"
+
+	assert fecha_disponible(fecha_maxima, fecha_minima, fecha_maxima)
+
+@pytest.mark.parametrize(["dias"],
+	[(1,),(2,),(22,),(13,),(200,)]
+)
+def test_fecha_disponible_inferior_fecha_minima(dias):
+
+	fecha_minima="2019-03-05"
+	fecha_maxima="2024-03-05"
+
+	fecha=(datetime.strptime(fecha_minima, "%Y-%m-%d")-timedelta(days=dias)).strftime("%Y-%m-%d")
+
+	assert not fecha_disponible(fecha, fecha_minima, fecha_maxima)
+
+@pytest.mark.parametrize(["dias"],
+	[(1,),(2,),(22,),(13,),(200,)]
+)
+def test_fecha_disponible_superior_fecha_maxima(dias):
+
+	fecha_minima="2019-03-05"
+	fecha_maxima="2024-03-05"
+
+	fecha=(datetime.strptime(fecha_maxima, "%Y-%m-%d")+timedelta(days=dias)).strftime("%Y-%m-%d")
+
+	assert not fecha_disponible(fecha, fecha_minima, fecha_maxima)
+
+@pytest.mark.parametrize(["dias"],
+	[(1,),(2,),(22,),(13,),(200,)]
+)
+def test_fecha_disponible_superior_fecha_minima(dias):
+
+	fecha_minima="2019-03-05"
+	fecha_maxima="2024-03-05"
+
+	fecha=(datetime.strptime(fecha_minima, "%Y-%m-%d")+timedelta(days=dias)).strftime("%Y-%m-%d")
+
+	assert fecha_disponible(fecha, fecha_minima, fecha_maxima)
+
+@pytest.mark.parametrize(["dias"],
+	[(1,),(2,),(22,),(13,),(200,)]
+)
+def test_fecha_disponible_inferior_fecha_maxima(dias):
+
+	fecha_minima="2019-03-05"
+	fecha_maxima="2024-03-05"
+
+	fecha=(datetime.strptime(fecha_maxima, "%Y-%m-%d")-timedelta(days=dias)).strftime("%Y-%m-%d")
+
+	assert fecha_disponible(fecha, fecha_minima, fecha_maxima)

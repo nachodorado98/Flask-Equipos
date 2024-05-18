@@ -75,6 +75,12 @@ body {
     color: #3498db;
 }
 
+.navbar p {
+    color: #ecf0f1;
+    text-decoration: none;
+    font-size: 18px;
+}
+
 .tarjetas-partidos {
     max-height: calc(57vh - 100px);
     overflow-y: auto;

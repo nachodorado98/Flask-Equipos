@@ -24,7 +24,12 @@
 
         <div class="navbar" id="navbar">
             <ul>
+                <li><a href="/?fecha={{ fecha_minima }}">Primeros partidos</a></li>
                 <li><a href="/">Ultimos partidos</a></li>
+                <li><p>Fecha Especifica</p></li>
+                <li>
+                    <input type="date" id="fecha-calendario" value="{{ fecha }}" min="{{ fecha_minima }}" max="{{ fecha_maxima }}"/>
+                </li>
             </ul>
         </div>
 
@@ -67,6 +72,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/calendario.js') }}"></script>
 
     <footer>
         <p>&copy; 2024 Partidos App. Todos los derechos reservados.</p>

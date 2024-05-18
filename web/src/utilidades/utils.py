@@ -55,3 +55,16 @@ def es_maxima(fecha:str, fecha_maxima:str)->bool:
 def es_minima(fecha:str, fecha_minima:str)->bool:
 
 	return True if fecha==fecha_minima else False
+
+# Funcion para saber si la fecha esta disponible (esta entre la minima y la maxima)
+def fecha_disponible(fecha:str, fecha_minima:str, fecha_maxima:str)->bool:
+
+	if es_maxima(fecha, fecha_maxima) or es_minima(fecha, fecha_minima):
+
+		return True
+
+	bool_maxima=datetime.strptime(fecha, "%Y-%m-%d")>datetime.strptime(fecha_maxima, "%Y-%m-%d")
+
+	bool_minima=datetime.strptime(fecha, "%Y-%m-%d")<datetime.strptime(fecha_minima, "%Y-%m-%d")
+
+	return False if bool_maxima or bool_minima else True
