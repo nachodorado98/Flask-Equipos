@@ -7,10 +7,10 @@ from src.utilidades.utils import fecha_formato_correcto, fecha_anterior, fecha_s
 from src.utilidades.utils import es_maxima, es_minima, fecha_disponible
 from src.config import URL_DATALAKE
 
-bp_inicio=Blueprint("inicio", __name__)
+bp_partidos_fecha=Blueprint("partidos_fecha", __name__)
 
-@bp_inicio.route("/", methods=["GET"])
-def inicio():
+@bp_partidos_fecha.route("/", methods=["GET"])
+def partidos_fecha():
 
 	con=Conexion()
 

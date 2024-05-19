@@ -35,6 +35,8 @@ def limpiarDataPartidos(tabla:pd.DataFrame)->pd.DataFrame:
 
 	tabla["Attendance"]=tabla["Attendance"].apply(limpiarPublico)
 
+	tabla["Time"]=tabla["Time"].apply(lambda hora: hora.strip())
+
 	def filtrarFila(codigo1:str, codigo2:str)->str:
 
 		conexion=Conexion()

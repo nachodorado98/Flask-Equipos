@@ -44,7 +44,7 @@
 
                     {% for partido in partidos %}
 
-                        <div class="tarjeta-partido">
+                        <div class="tarjeta-partido" onclick="window.location.href='/detalle_partido/{{ partido[8] }}'">
                             <p><strong>{{ partido[0] }}</strong> - {{ partido[1] }}</p>
                             <div class="info-partido">
 

@@ -42,15 +42,16 @@ class Conexion:
 	# Metodo para obtener los partidos de una fecha
 	def obtenerPartidosFecha(self, fecha:str)->Optional[List[tuple]]:
 
-		self.c.execute("""SELECT p.competicion, p.ronda, p.local, p.marcador, p.visitante, p.fecha, 
-								CASE WHEN e1.equipo_url IS NULL THEN 'no-imagen' ELSE e1.equipo_url END as local_imagen, 
-								CASE WHEN e2.equipo_url IS NULL THEN 'no-imagen' ELSE e2.equipo_url END as visitante_imagen
+		self.c.execute("""SELECT p.Id, p.Competicion, p.Ronda, p.Local, p.Marcador, p.Visitante, p.Fecha, 
+								CASE WHEN e1.Equipo_url IS NULL THEN 'no-imagen' ELSE e1.Equipo_url END as Local_imagen, 
+								CASE WHEN e2.Equipo_url IS NULL THEN 'no-imagen' ELSE e2.Equipo_url END as Visitante_imagen
 							FROM partidos p
 							LEFT JOIN equipos e1
-							ON p.CodEquipo1=e1.codigo_url 
+							ON p.CodEquipo1=e1.Codigo_url 
 							LEFT JOIN equipos e2
-							ON p.CodEquipo2=e2.codigo_url
-							WHERE fecha=%s""",
+							ON p.CodEquipo2=e2.Codigo_url
+							WHERE p.Fecha=%s
+							ORDER BY p.Id""",
 							(fecha,))
 
 		partidos=self.c.fetchall()
@@ -62,7 +63,8 @@ class Conexion:
 											partido["visitante"],
 											partido["fecha"].strftime("%d-%m-%Y"),
 											partido["local_imagen"],
-											partido["visitante_imagen"]), partidos)) if partidos else None
+											partido["visitante_imagen"],
+											partido["id"]), partidos)) if partidos else None
 
 	# Metodo para saber si la tabla partidos esta vacia
 	def tabla_partidos_vacia(self)->bool:
@@ -81,3 +83,42 @@ class Conexion:
 		fecha_minima=self.c.fetchone()["fecha_minima"]
 
 		return None if fecha_minima is None else fecha_minima.strftime("%Y-%m-%d")
+
+	# Metodo para comprobar si un partido existe por su id
+	def partido_existe(self, id_partido:int)->bool:
+
+		self.c.execute("""SELECT *
+						FROM partidos
+						WHERE Id=%s""",
+						(id_partido,))
+
+		return False if not self.c.fetchone() else True
+
+	# Metodo para obtener el detalle de un partido
+	def detalle_partido(self, id_partido:int)->Optional[tuple]:
+
+		self.c.execute("""SELECT p.Competicion, p.Ronda, p.Local, p.Marcador, p.Visitante, p.Fecha, 
+								CASE WHEN e1.Equipo_url IS NULL THEN 'no-imagen' ELSE e1.Equipo_url END as Local_imagen, 
+								CASE WHEN e2.Equipo_url IS NULL THEN 'no-imagen' ELSE e2.Equipo_url END as Visitante_imagen,
+								p.Hora, p.Publico, p.Sede
+							FROM partidos p
+							LEFT JOIN equipos e1
+							ON p.CodEquipo1=e1.Codigo_url 
+							LEFT JOIN equipos e2
+							ON p.CodEquipo2=e2.Codigo_url
+							WHERE p.Id=%s""",
+							(id_partido,))
+
+		partido=self.c.fetchone()
+
+		return None if partido is None else (partido["competicion"],
+											partido["ronda"],
+											partido["local"],
+											partido["marcador"],
+											partido["visitante"],
+											partido["fecha"].strftime("%d-%m-%Y"),
+											partido["local_imagen"],
+											partido["visitante_imagen"],
+											partido["hora"],
+											partido["publico"],
+											partido["sede"])

@@ -17,37 +17,17 @@ def anadirPartidos(conexion):
 
 		conexion.confirmar()
 
-def test_tabla_partidos_vacia_inicio(conexion):
+def test_pagina_detalle_partido_no_existe(cliente, conexion):
 
-	conexion.c.execute("SELECT * FROM partidos")
+	respuesta=cliente.get("/detalle_partido/0")
 
-	assert not conexion.c.fetchall()
+	contenido=respuesta.data.decode()
 
-def test_tabla_partidos_llena(conexion):
+	respuesta.status_code==302
+	assert respuesta.location=="/"
+	assert "Redirecting..." in contenido
 
-	assert conexion.tabla_partidos_vacia()
-
-def test_obtener_partidos_no_existen(conexion):
-
-	assert conexion.obtenerPartidosFecha("2019-06-22") is None
-
-def test_obtener_partidos_existen(conexion):
-
-	anadirPartidos(conexion)
-
-	partidos_obtenidos=conexion.obtenerPartidosFecha("2019-06-22")
-
-	assert len(partidos_obtenidos)==3
-
-	for partido in partidos_obtenidos:
-
-		assert partido[5]=="22-06-2019"
-
-def test_partido_existe_no_existe(conexion):
-
-	assert not conexion.partido_existe(0)
-
-def test_partido_existe(conexion):
+def test_pagina_detalle_partido(cliente, conexion):
 
 	anadirPartidos(conexion)
 
@@ -55,24 +35,10 @@ def test_partido_existe(conexion):
 
 	id_partido=partidos_obtenidos[0][-1]
 
-	assert conexion.partido_existe(id_partido)
+	respuesta=cliente.get(f"/detalle_partido/{id_partido}")
 
-def test_detalle_partido_no_existe(conexion):
+	contenido=respuesta.data.decode()
 
-	assert not conexion.detalle_partido(0)
-
-def test_detalle_partido(conexion):
-
-	anadirPartidos(conexion)
-
-	partidos_obtenidos=conexion.obtenerPartidosFecha("2019-06-22")
-
-	id_partido=partidos_obtenidos[0][-1]
-
-	datos_partido=conexion.detalle_partido(id_partido)
-
-	assert len(datos_partido)==11
-
-	conexion.c.execute("DELETE FROM partidos")
-
-	conexion.confirmar()
+	respuesta.status_code==200
+	assert "Fecha: " in contenido
+	assert "personas" in contenido
